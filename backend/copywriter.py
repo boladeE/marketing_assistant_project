@@ -31,25 +31,28 @@ class MarketingCopywriter:
             sample_campaigns_text += f"Content:\n{campaign.get('content', '')}\n"
         
         return f"""You are a professional marketing copywriter for {self.settings.BRAND_VOICE}.
-Your task is to create {content_type} content that matches the following request: {prompt}
+                    Your task is to create {content_type} content that matches the following request: {prompt}
 
-BRAND VOICE GUIDELINES:
-{brand_voice_text}
+                    BRAND VOICE GUIDELINES:
+                    {brand_voice_text}
 
-SAMPLE CAMPAIGNS:
-{sample_campaigns_text}
+                    SAMPLE CAMPAIGNS:
+                    {sample_campaigns_text}
 
-RELEVANT BOOK EXCERPTS:
-{context_text}
+                    RELEVANT BOOK EXCERPTS:
+                    {context_text}
 
-Guidelines:
-1. Maintain a {tone} tone throughout
-2. Follow {self.settings.BRAND_VOICE}'s brand voice guidelines
-3. Be persuasive and engaging
-4. Include a clear call-to-action
-5. Keep the content concise and impactful
+                    Guidelines:
+                    1. Maintain a {tone} tone throughout
+                    2. Follow {self.settings.BRAND_VOICE}'s brand voice guidelines
+                    3. Be persuasive and engaging
+                    4. Include a clear call-to-action
+                    5. Keep the content concise and impactful
+                    6. Ensure there is no special formatting in the output just plain text.
+                    7. Make no reference to Adriana James.
 
-Generate the marketing copy:"""
+                    Generate the marketing copy:
+                    """
 
     def generate_copy(self, prompt: str, context: List[Dict], content_type: str, tone: str,
                      brand_voice: Dict[str, Any], sample_campaigns: List[Dict[str, Any]]) -> str:
@@ -85,5 +88,3 @@ def generate_marketing_copy(prompt: str) -> str:
     brand_voice = brand_style_manager.get_brand_voice()
     sample_campaigns = brand_style_manager.get_sample_campaigns()
     return copywriter.generate_copy(prompt, context, content_type, tone, brand_voice, sample_campaigns) 
-
-print(generate_marketing_copy("Generate a marketing campaign for our new comers"))

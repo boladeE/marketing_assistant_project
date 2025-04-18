@@ -4,16 +4,14 @@ import json
 from config import settings
 from brand_style import BrandStyleManager
 
-# Initialize brand style manager
-brand_style_manager = BrandStyleManager()
-
 class MarketingCopywriter:
-    def __init__(self):
+    def __init__(self, brand_style_manager: BrandStyleManager):
         self.settings = settings
         self.api_key = self.settings.DEEPSEEK_API_KEY
         self.api_url = "https://api.deepseek.com/v1/chat/completions"
+        self.brand_style_manager = brand_style_manager
     
-    def _build_prompt(self, prompt: str, context: List[Dict], content_type: str, tone: str, 
+    def _build_prompt(self, prompt: str, context: List[Dict], tone: str, 
                      brand_voice: Dict[str, Any], sample_campaigns: List[Dict[str, Any]]) -> str:
         """Build a prompt for the LLM using context and parameters."""
         # Format context from book excerpts
@@ -31,7 +29,7 @@ class MarketingCopywriter:
             sample_campaigns_text += f"Content:\n{campaign.get('content', '')}\n"
         
         return f"""You are a professional marketing copywriter for {self.settings.BRAND_VOICE}.
-                    Your task is to create {content_type} content that matches the following request: {prompt}
+                    Your task is to create content that matches the following request: {prompt}
 
                     BRAND VOICE GUIDELINES:
                     {brand_voice_text}
@@ -81,10 +79,10 @@ class MarketingCopywriter:
 
 def generate_marketing_copy(prompt: str) -> str:
     """Helper function to generate marketing copy."""
-    copywriter = MarketingCopywriter()
+    brand_style_manager = BrandStyleManager()
+    copywriter = MarketingCopywriter(brand_style_manager)
     context = brand_style_manager.get_relevant_context(prompt)
-    content_type = "email"
     tone = "professional and empathetic"
     brand_voice = brand_style_manager.get_brand_voice()
     sample_campaigns = brand_style_manager.get_sample_campaigns()
-    return copywriter.generate_copy(prompt, context, content_type, tone, brand_voice, sample_campaigns) 
+    return copywriter.generate_copy(prompt, context, tone, brand_voice, sample_campaigns) 

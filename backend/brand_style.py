@@ -8,10 +8,10 @@ from vector_store import VectorStore
 from config import settings
 
 class BrandStyleManager:
-    def __init__(self):
+    def __init__(self, embeddings: CohereEmbeddings, vector_store: VectorStore):
         self.settings = settings
-        self.embeddings = CohereEmbeddings()
-        self.vector_store = VectorStore()
+        self.embeddings = embeddings
+        self.vector_store = vector_store
         self.brand_voice = self._load_brand_voice()
         self.sample_campaigns = self._load_sample_campaigns()
     
@@ -91,11 +91,11 @@ class BrandStyleManager:
         results = self.vector_store.search(prompt_embedding, k=k)
         
         # Optionally rerank results
-        if results:
-            texts = [result["text"] for result in results]
-            reranked = self.embeddings.rerank_results(prompt, texts, top_n=k)
-            # Convert reranked results to the expected format
-            return [{"text": text} for text in reranked]
+        # if results:
+        #     texts = [result["text"] for result in results]
+        #     reranked = self.embeddings.rerank_results(prompt, texts, top_n=k)
+        #     # Convert reranked results to the expected format
+        #     return [{"text": text} for text in reranked]
         
         # If no results, return empty list
         return []
@@ -139,16 +139,3 @@ class BrandStyleManager:
         else:
             print(f"No content extracted from {pdf_path}") 
 
-# # Example usage
-# if __name__ == "__main__":
-#     brand_style_manager = BrandStyleManager()
-    
-#     # Example: Get relevant context for a marketing prompt
-#     prompt = "Generate a marketing campaign for an Umbrella company"
-#     context = brand_style_manager.get_relevant_context(prompt)
-    
-#     # Print the context in a readable format
-#     print(f"Relevant context for prompt: '{prompt}'")
-#     for i, item in enumerate(context):
-#         print(f"\nReference {i+1}:")
-#         print(item["text"])

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Past Campaigns - Marketing Assistant AI</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .campaign {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #f9f9f9;
+        }
+        .campaign-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .campaign-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .edit-textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            line-height: 1.5;
+            resize: vertical;
+        }
+        .button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            color: white;
+        }
+        .edit-button {
+            background-color: #2196F3;
+        }
+        .delete-button {
+            background-color: #f44336;
+        }
+        .save-button {
+            background-color: #4CAF50;
+        }
+        .button:hover {
+            opacity: 0.9;
+        }
+        .timestamp {
+            color: #666;
+            font-size: 14px;
+        }
+        .nav-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #2196F3;
+            text-decoration: none;
+        }
+        .nav-link:hover {
+            text-decoration: underline;
+        }
+        .debug-info {
+            background-color: #f8f9fa;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>Past Campaigns</h1>
+    <a href="/" class="nav-link">← Back to Generator</a>
+    
+    <div class="container">
+        <!-- Debug information -->
+        <div class="debug-info">
+            Number of campaigns: {{ campaigns|length }}
+        </div>
+
+        {% if campaigns %}
+            {% for campaign in campaigns %}
+            <div class="campaign" id="campaign-{{ loop.index }}">
+                <div class="campaign-header">
+                    <h3>Prompt: {{ campaign.prompt }}</h3>
+                    <div class="campaign-actions">
+                        <button type="button" class="button edit-button" onclick="toggleEdit({{ loop.index }})">Edit</button>
+                        <form action="/delete-campaign" method="post" style="display: inline;">
+                            <input type="hidden" name="index" value="{{ loop.index0 }}">
+                            <button type="submit" class="button delete-button">Delete</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="timestamp">Created: {{ campaign.timestamp }}</div>
+                <div id="view-{{ loop.index }}">
+                    <p>{{ campaign.content }}</p>
+                </div>
+                <div id="edit-{{ loop.index }}" style="display: none;">
+                    <form action="/update-campaign" method="post">
+                        <input type="hidden" name="index" value="{{ loop.index0 }}">
+                        <textarea name="editedCopy" class="edit-textarea">{{ campaign.content }}</textarea>
+                        <button type="submit" class="button save-button">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No campaigns found.</p>
+        {% endif %}
+    </div>
+
+    <script>
+        function toggleEdit(index) {
+            const viewDiv = document.getElementById(`view-${index}`);
+            const editDiv = document.getElementById(`edit-${index}`);
+            if (viewDiv.style.display === 'none') {
+                viewDiv.style.display = 'block';
+                editDiv.style.display = 'none';
+            } else {
+                viewDiv.style.display = 'none';
+                editDiv.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html> 

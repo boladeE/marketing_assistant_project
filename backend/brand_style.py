@@ -91,11 +91,11 @@ class BrandStyleManager:
         results = self.vector_store.search(prompt_embedding, k=k)
         
         # Optionally rerank results
-        # if results:
-        #     texts = [result["text"] for result in results]
-        #     reranked = self.embeddings.rerank_results(prompt, texts, top_n=k)
-        #     # Convert reranked results to the expected format
-        #     return [{"text": text} for text in reranked]
+        if results:
+            texts = [result["text"] for result in results]
+            reranked = self.embeddings.rerank_results(prompt, texts, top_n=k)
+            # Convert reranked results to the expected format
+            return [{"text": text} for text in reranked]
         
         # If no results, return empty list
         return []

@@ -11,7 +11,6 @@ import datetime
 app = Flask(__name__)
 
 # Initialize brand style manager
-brand_style_manager = BrandStyleManager()
 data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data"))
 campaign_prompt = []
 
@@ -35,7 +34,6 @@ def root():
     global prompt
     if request.method == 'POST':
         prompt = request.form.get('prompt')
-        campaign_prompt.pop()
         campaign_prompt.append(prompt)
         marketing_copy = generate_marketing_copy(prompt)
         return render_template('index.html', generated_copy=marketing_copy)

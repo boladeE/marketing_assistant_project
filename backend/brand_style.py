@@ -17,7 +17,7 @@ class BrandStyleManager:
     
     def _load_brand_voice(self) -> Dict[str, Any]:
         """Load brand voice guidelines from JSON."""
-        file_path = "data/style_guidelines/brand_voice.json"
+        file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "style_guidelines", "brand_voice.json"))
         if os.path.exists(file_path):
             with open(file_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
@@ -25,7 +25,8 @@ class BrandStyleManager:
     
     def _load_sample_campaigns(self) -> List[Dict[str, Any]]:
         """Load sample campaigns from JSON."""
-        file_path = "data/past_campaigns/sample_campaigns.json"
+        
+        file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "past_campaigns", "sample_campaigns.json"))
         if os.path.exists(file_path):
             with open(file_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)

@@ -3,6 +3,8 @@ import requests
 import json
 from config import settings
 from brand_style import BrandStyleManager
+from embeddings import CohereEmbeddings
+from vector_store import VectorStore
 
 class MarketingCopywriter:
     def __init__(self, brand_style_manager: BrandStyleManager):
@@ -52,10 +54,10 @@ class MarketingCopywriter:
                     Generate the marketing copy:
                     """
 
-    def generate_copy(self, prompt: str, context: List[Dict], content_type: str, tone: str,
-                     brand_voice: Dict[str, Any], sample_campaigns: List[Dict[str, Any]]) -> str:
+    def generate_copy(self, prompt: str, context: List[Dict],  tone: str,
+                     brand_voice: Dict[str, Any], sample_campaigns) -> str:
         """Generate marketing copy using DeepSeek."""
-        full_prompt = self._build_prompt(prompt, context, content_type, tone, brand_voice, sample_campaigns)
+        full_prompt = self._build_prompt(prompt, context, tone, brand_voice, sample_campaigns)
         
         headers = {
             "Authorization": f"Bearer {self.api_key}",
@@ -79,10 +81,13 @@ class MarketingCopywriter:
 
 def generate_marketing_copy(prompt: str) -> str:
     """Helper function to generate marketing copy."""
-    brand_style_manager = BrandStyleManager()
+    embeddings = CohereEmbeddings()
+    vector_store = VectorStore()
+    brand_style_manager = BrandStyleManager(embeddings, vector_store)
     copywriter = MarketingCopywriter(brand_style_manager)
     context = brand_style_manager.get_relevant_context(prompt)
     tone = "professional and empathetic"
     brand_voice = brand_style_manager.get_brand_voice()
     sample_campaigns = brand_style_manager.get_sample_campaigns()
+    print(sample_campaigns)
     return copywriter.generate_copy(prompt, context, tone, brand_voice, sample_campaigns) 

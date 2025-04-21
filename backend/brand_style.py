@@ -6,6 +6,7 @@ from PyPDF2 import PdfReader
 from embeddings import CohereEmbeddings
 from vector_store import VectorStore
 from config import settings
+from database import Database
 
 class BrandStyleManager:
     def __init__(self, embeddings: CohereEmbeddings, vector_store: VectorStore):
@@ -13,6 +14,7 @@ class BrandStyleManager:
         self.embeddings = embeddings
         self.vector_store = vector_store
         self.brand_voice = self._load_brand_voice()
+        self.db = Database()
         self.sample_campaigns = self._load_sample_campaigns()
     
     def _load_brand_voice(self) -> Dict[str, Any]:
@@ -24,14 +26,8 @@ class BrandStyleManager:
         return {}
     
     def _load_sample_campaigns(self) -> List[Dict[str, Any]]:
-        """Load sample campaigns from JSON."""
-        
-        file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "past_campaigns", "sample_campaigns.json"))
-        if os.path.exists(file_path):
-            with open(file_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                return data.get("campaigns", [])
-        return []
+        """Load sample campaigns from the database."""
+        return self.db.get_all_campaigns()
     
     def _extract_text_from_pdf(self, pdf_path: str) -> str:
         """Extract text from a PDF file."""
@@ -39,9 +35,7 @@ class BrandStyleManager:
         try:
             reader = PdfReader(pdf_path)
             for page in reader.pages:
-                page_text = page.extract_text()
-                if page_text:
-                    text += page_text + "\n\n"
+                text += page.extract_text() + "\n"
         except Exception as e:
             print(f"Error extracting text from PDF: {e}")
         return text
@@ -83,23 +77,10 @@ class BrandStyleManager:
         else:
             print("No content found to add to vector store")
     
-    def get_relevant_context(self, prompt: str, k: int = 5) -> List[Dict]:
-        """Get relevant context for a given prompt from book excerpts."""
-        # Generate embedding for the prompt
-        prompt_embedding = self.embeddings.generate_embedding(prompt)
-        
-        # Search for similar content in book excerpts
-        results = self.vector_store.search(prompt_embedding, k=k)
-        
-        # Optionally rerank results
-        if results:
-            texts = [result["text"] for result in results]
-            reranked = self.embeddings.rerank_results(prompt, texts, top_n=k)
-            # Convert reranked results to the expected format
-            return [{"text": text} for text in reranked]
-        
-        # If no results, return empty list
-        return []
+    def get_relevant_context(self, query: str, top_k: int = 3) -> List[Dict[str, str]]:
+        """Get relevant context from the vector store based on the query."""
+        query_embedding = self.embeddings.generate_embedding(query)
+        return self.vector_store.search(query_embedding, k=top_k)
     
     def get_brand_voice(self) -> Dict[str, Any]:
         """Get brand voice guidelines."""

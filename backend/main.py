@@ -4,30 +4,17 @@ from typing import Optional, List, Dict, Any
 from copywriter import generate_marketing_copy
 from brand_style import BrandStyleManager
 from config import settings
+from database import Database
 import os
 import json
 import datetime
 
 app = Flask(__name__)
 
-# Initialize brand style manager
+# Initialize brand style manager and database
 data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data"))
 campaign_prompt = []
-
-def load_campaigns():
-    campaigns_file = os.path.join(data_dir, "past_campaigns", "campaigns.json")
-    if os.path.exists(campaigns_file):
-        with open(campaigns_file, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            campaigns = data.get("campaigns", [])
-            return campaigns
-    return []
-
-def save_campaigns(campaigns):
-    campaigns_file = os.path.join(data_dir, "past_campaigns", "campaigns.json")
-    os.makedirs(os.path.dirname(campaigns_file), exist_ok=True)
-    with open(campaigns_file, 'w', encoding='utf-8') as f:
-        json.dump({"campaigns": campaigns}, f, indent=4)
+db = Database()
 
 @app.route('/', methods=['GET', 'POST'])
 def root():
@@ -41,7 +28,7 @@ def root():
 
 @app.route('/campaigns')
 def view_campaigns():
-    campaigns = load_campaigns()
+    campaigns = db.get_all_campaigns()
     return render_template('campaigns.html', campaigns=campaigns)
 
 @app.route('/save-edit', methods=['POST'])
@@ -49,40 +36,21 @@ def save_edit():
     edited_copy = request.form.get('editedCopy')
     global campaign_prompt
     prompt = campaign_prompt[-1]
-    campaigns = load_campaigns()
-    new_campaign = {
-        "prompt": prompt,
-        "content": edited_copy,
-        "timestamp": datetime.datetime.now().isoformat()
-    }
-    campaigns.append(new_campaign)
-    save_campaigns(campaigns)
-    
+    db.add_campaign(prompt, edited_copy)
     return render_template('index.html', generated_copy="Campaign saved successfully")
 
 @app.route('/update-campaign', methods=['POST'])
 def update_campaign():
     index = int(request.form.get('index'))
     edited_copy = request.form.get('editedCopy')
-    
-    campaigns = load_campaigns()
-    if 0 <= index < len(campaigns):
-        campaigns[index]['content'] = edited_copy
-        campaigns[index]['timestamp'] = datetime.datetime.now().isoformat()
-        save_campaigns(campaigns)
-    
+    db.update_campaign(index, edited_copy)
     return redirect(url_for('view_campaigns'))
 
 @app.route('/delete-campaign', methods=['POST'])
 def delete_campaign():
     index = int(request.form.get('index'))
-    
-    campaigns = load_campaigns()
-    if 0 <= index < len(campaigns):
-        campaigns.pop(index)
-        save_campaigns(campaigns)
-    
+    db.delete_campaign(index)
     return redirect(url_for('view_campaigns'))
 
-if __name__ == "__main__":
-    app.run(host='localhost', port=8000, debug=True)
+if __name__ == '__main__':
+    app.run(debug=True)

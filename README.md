@@ -89,9 +89,3 @@ data = {"prompt": "Write a social media post for our new product launch"}
 response = requests.post(url, json=data)
 print(response.json())
 ```
-
-## Success Criteria
-
-* The system generates high-quality marketing content aligned with brand guidelines.
-* The AI model can be updated with new data to improve performance.
-* The backend supports efficient content retrieval and management.
